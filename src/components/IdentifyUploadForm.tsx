@@ -10,7 +10,7 @@ import {
 } from '../services/identifyService'
 
 type IdentifyUploadFormProps = {
-  fileInputRef: RefObject<HTMLInputElement>
+  fileInputRef: RefObject<HTMLInputElement | null>
   previewUrl?: string
   selectedFileName?: string
   isUploading: boolean
@@ -52,6 +52,7 @@ const IdentifyUploadForm: FC<IdentifyUploadFormProps> = ({
         capture="environment"
         className="identifier__file-input"
         onChange={onFileInputChange}
+        placeholder="Upload a photo of your plant"
       />
 
       <div className="identifier__actions">

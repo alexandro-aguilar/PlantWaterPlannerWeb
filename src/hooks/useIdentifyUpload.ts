@@ -16,7 +16,7 @@ import {
 } from '../services/identifyService'
 
 type IdentifyUploadHook = {
-  fileInputRef: RefObject<HTMLInputElement>
+  fileInputRef: RefObject<HTMLInputElement | null>
   previewUrl?: string
   selectedFileName?: string
   isUploading: boolean

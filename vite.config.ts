@@ -5,7 +5,12 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   server: {
     proxy: {
-      '/plant-water-planner-bucket': 'http://localhost:4566', // Proxy requests starting with /api to your backend
+      '/plant-water-planner-bucket': {
+        target: 'http://localhost:4566',
+        changeOrigin: true,
+        secure: false, // LocalStack uses HTTP
+        // rewrite: (path) => path.replace(/^\/proxy/, ""),
+      },
     },
   },
   plugins: [react()],
