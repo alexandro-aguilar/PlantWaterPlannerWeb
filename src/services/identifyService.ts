@@ -33,16 +33,9 @@ export async function identifyPlantFromImage(
 
     await uploadImageToStorage(file, presignedUrl.url);
 
-    await identifyPlantUsingUploadedImage(presignedUrl.key)
+    const result = await identifyPlantUsingUploadedImage(presignedUrl.key)
 
-    return {
-      name: '',
-      scientific_name: '',
-      sunlight_preference: '',
-      watering_frequency_days: 0,
-      current_condition: '',
-      care_notes: ''
-    };
+    return result;
   } catch (error) {
     console.error('Error identifying plant:', error)
     throw new Error('Failed to identify plant')
@@ -104,13 +97,12 @@ async function identifyPlantUsingUploadedImage(
     )
   }
 
-  const data: PlantIdentificationResponse = await response.json()
+  const data: PlantIdentificationResponse = await response.json();
 
   if (data.result?.plant) {
-    console.log('Identified plant:', data)
     return data.result.plant
   } else {
-    throw new Error('No plant identified in the response.')
+    throw new Error('No plant identified in the response.');
   }
 }
 
