@@ -2,6 +2,7 @@ import {
   type ChangeEvent,
   type FC,
   type FormEvent,
+  type KeyboardEvent,
   type RefObject,
 } from 'react'
 import {
@@ -43,8 +44,73 @@ const IdentifyUploadForm: FC<IdentifyUploadFormProps> = ({
     .filter(Boolean)
     .join(' ')
 
+  const handleDropzoneKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      openFilePicker()
+    }
+  }
+
   return (
     <form className="identifier" onSubmit={onFormSubmit} noValidate>
+      <div
+        className={triggerClassName}
+        role="button"
+        tabIndex={0}
+        onClick={openFilePicker}
+        onKeyDown={handleDropzoneKeyDown}
+        aria-label="Upload a photo of your plant"
+      >
+        {previewUrl ? (
+          <div className="identifier__preview">
+            <img
+              src={previewUrl}
+              alt="Selected plant preview"
+              className="identifier__preview-image"
+            />
+          </div>
+        ) : (
+          <div className="identifier__dropzone-empty">
+            <span className="identifier__pill">JPG only</span>
+            <p className="identifier__dropzone-title">
+              Drop or click to add a plant photo
+            </p>
+            <p className="identifier__dropzone-subtitle">
+              Up to {IDENTIFY_MAX_FILE_SIZE_MB}MB. We will use this photo to
+              identify your plant and offer care tips.
+            </p>
+          </div>
+        )}
+
+        <div className="identifier__dropzone-footer">
+          <div className="identifier__selection">
+            {selectedFileName ? (
+              <span title={selectedFileName}>{selectedFileName}</span>
+            ) : (
+              <span>No photo selected yet</span>
+            )}
+          </div>
+          <div className="identifier__dropzone-actions">
+            <button
+              type="button"
+              className="identifier__secondary identifier__secondary--accent"
+              onClick={openFilePicker}
+            >
+              Upload photo
+            </button>
+            {hasSelection && (
+              <button
+                type="button"
+                className="identifier__ghost"
+                onClick={resetSelection}
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       <input
         ref={fileInputRef}
         type="file"
