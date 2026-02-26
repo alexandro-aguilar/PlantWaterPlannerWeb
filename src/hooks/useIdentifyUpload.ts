@@ -7,13 +7,14 @@ import {
   useRef,
   useState,
 } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   IDENTIFY_ALLOWED_MIME_TYPES,
   IDENTIFY_MAX_FILE_SIZE_BYTES,
   IDENTIFY_MAX_FILE_SIZE_MB,
   identifyPlantFromImage,
-  type PlantIdentification,
 } from '../services/identifyService'
+import type { IdentifyResultLocationState } from '../types/identifyResultState'
 
 type IdentifyUploadHook = {
   fileInputRef: RefObject<HTMLInputElement | null>
@@ -21,7 +22,6 @@ type IdentifyUploadHook = {
   selectedFileName?: string
   isUploading: boolean
   errorMessage?: string
-  result?: PlantIdentification
   hasSelection: boolean
   onFormSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>
   onFileInputChange: (event: ChangeEvent<HTMLInputElement>) => void
@@ -34,8 +34,8 @@ export function useIdentifyUpload(): IdentifyUploadHook {
   const [previewUrl, setPreviewUrl] = useState<string>()
   const [isUploading, setIsUploading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string>()
-  const [result, setResult] = useState<PlantIdentification>()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const navigate = useNavigate()
 
   const revokePreview = useCallback((url?: string) => {
     if (url) {
@@ -51,7 +51,6 @@ export function useIdentifyUpload(): IdentifyUploadHook {
 
   const resetSelection = useCallback(() => {
     setSelectedFile(null)
-    setResult(undefined)
     setErrorMessage(undefined)
     setPreviewUrl((previous) => {
       revokePreview(previous)
@@ -65,7 +64,6 @@ export function useIdentifyUpload(): IdentifyUploadHook {
   const handleInvalidSelection = useCallback(
     (message: string) => {
       setSelectedFile(null)
-      setResult(undefined)
       setErrorMessage(message)
       setPreviewUrl((previous) => {
         revokePreview(previous)
@@ -101,7 +99,6 @@ export function useIdentifyUpload(): IdentifyUploadHook {
       }
 
       setErrorMessage(undefined)
-      setResult(undefined)
       setSelectedFile(file)
       setPreviewUrl((previous) => {
         revokePreview(previous)
@@ -137,7 +134,12 @@ export function useIdentifyUpload(): IdentifyUploadHook {
 
       try {
         const plant = await identifyPlantFromImage(selectedFile)
-        setResult(plant)
+        const resultState: IdentifyResultLocationState = {
+          plant,
+          imageFile: selectedFile,
+          fileName: selectedFile.name,
+        }
+        navigate('/result', { state: resultState })
       } catch (error) {
         const message =
           error instanceof Error
@@ -148,7 +150,7 @@ export function useIdentifyUpload(): IdentifyUploadHook {
         setIsUploading(false)
       }
     },
-    [selectedFile],
+    [navigate, selectedFile],
   )
 
   return {
@@ -157,7 +159,6 @@ export function useIdentifyUpload(): IdentifyUploadHook {
     selectedFileName: selectedFile?.name,
     isUploading,
     errorMessage,
-    result,
     hasSelection: Boolean(selectedFile),
     onFormSubmit,
     onFileInputChange,

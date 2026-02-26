@@ -12,7 +12,6 @@ const IdentifyUploadContainer: FC = () => {
       selectedFileName={upload.selectedFileName}
       isUploading={upload.isUploading}
       errorMessage={upload.errorMessage}
-      result={upload.result}
       hasSelection={upload.hasSelection}
       onFormSubmit={upload.onFormSubmit}
       onFileInputChange={upload.onFileInputChange}

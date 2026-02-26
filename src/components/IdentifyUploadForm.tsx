@@ -3,12 +3,10 @@ import {
   type FC,
   type FormEvent,
   type KeyboardEvent,
+  type MouseEvent,
   type RefObject,
 } from 'react'
-import {
-  IDENTIFY_MAX_FILE_SIZE_MB,
-  type PlantIdentification,
-} from '../services/identifyService'
+import { IDENTIFY_MAX_FILE_SIZE_MB } from '../services/identifyService'
 
 type IdentifyUploadFormProps = {
   fileInputRef: RefObject<HTMLInputElement | null>
@@ -16,7 +14,6 @@ type IdentifyUploadFormProps = {
   selectedFileName?: string
   isUploading: boolean
   errorMessage?: string
-  result?: PlantIdentification
   hasSelection: boolean
   onFormSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>
   onFileInputChange: (event: ChangeEvent<HTMLInputElement>) => void
@@ -30,7 +27,6 @@ const IdentifyUploadForm: FC<IdentifyUploadFormProps> = ({
   selectedFileName,
   isUploading,
   errorMessage,
-  result,
   hasSelection,
   onFormSubmit,
   onFileInputChange,
@@ -49,6 +45,16 @@ const IdentifyUploadForm: FC<IdentifyUploadFormProps> = ({
       event.preventDefault()
       openFilePicker()
     }
+  }
+
+  const handleUploadPhotoClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    openFilePicker()
+  }
+
+  const handleResetClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    resetSelection()
   }
 
   return (
@@ -94,7 +100,7 @@ const IdentifyUploadForm: FC<IdentifyUploadFormProps> = ({
             <button
               type="button"
               className="identifier__secondary identifier__secondary--accent"
-              onClick={openFilePicker}
+              onClick={handleUploadPhotoClick}
             >
               Upload photo
             </button>
@@ -102,7 +108,7 @@ const IdentifyUploadForm: FC<IdentifyUploadFormProps> = ({
               <button
                 type="button"
                 className="identifier__ghost"
-                onClick={resetSelection}
+                onClick={handleResetClick}
               >
                 Reset
               </button>
@@ -135,33 +141,6 @@ const IdentifyUploadForm: FC<IdentifyUploadFormProps> = ({
         <p className="identifier__status identifier__status--error">
           {errorMessage}
         </p>
-      )}
-
-      {result && (
-        <section className="identifier__result">
-          <h2 className="identifier__result-title">{result.name}</h2>
-          <p className="identifier__result-subtitle">
-            <em>{result.scientific_name}</em>
-          </p>
-          <dl className="identifier__result-grid">
-            <div className="identifier__result-item">
-              <dt>Sunlight Preference</dt>
-              <dd>{result.sunlight_preference}</dd>
-            </div>
-            <div className="identifier__result-item">
-              <dt>Watering Frequency</dt>
-              <dd>Every {result.watering_frequency_days} days</dd>
-            </div>
-            <div className="identifier__result-item">
-              <dt>Current Condition</dt>
-              <dd>{result.current_condition}</dd>
-            </div>
-            <div className="identifier__result-item identifier__result-item--full">
-              <dt>Care Notes</dt>
-              <dd>{result.care_notes}</dd>
-            </div>
-          </dl>
-        </section>
       )}
     </form>
   )
