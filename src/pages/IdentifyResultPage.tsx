@@ -69,7 +69,7 @@ const IdentifyResultPage: FC = () => {
             <dt>Watering</dt>
             <dd>Every {state.plant.watering_frequency_days} days</dd>
           </div>
-          <div className="identify-result__item">
+          <div className="identify-result__item identify-result__item--full">
             <dt>Condition</dt>
             <dd>{state.plant.current_condition}</dd>
           </div>
