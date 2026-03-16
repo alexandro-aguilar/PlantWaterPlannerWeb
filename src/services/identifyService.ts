@@ -8,9 +8,7 @@ export type PlantIdentification = {
 }
 
 export type PlantIdentificationResponse = {
-  result?: {
-    plant?: PlantIdentification
-  }
+  result?: PlantIdentification
   message?: string
 }
 
@@ -99,8 +97,8 @@ async function identifyPlantUsingUploadedImage(
 
   const data: PlantIdentificationResponse = await response.json();
 
-  if (data.result?.plant) {
-    return data.result.plant
+  if (data.result) {
+    return data.result;
   } else {
     throw new Error('No plant identified in the response.');
   }
