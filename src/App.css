@@ -331,7 +331,7 @@
   height: clamp(230px, 60vw, 310px);
   overflow: hidden;
   border-radius: 18px;
-  background: rgb(216 229 209 / 0.36);
+  background: #d8e5d15c;
   border: 1px solid rgb(255 255 255 / 0.24);
 }
 
