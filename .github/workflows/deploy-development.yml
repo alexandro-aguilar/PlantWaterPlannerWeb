@@ -63,6 +63,7 @@ jobs:
           bucket = "${TF_STATE_BUCKET}"
           key    = "${TF_STATE_KEY}"
           region = "${TF_STATE_REGION}"
+          use_lockfile = true
           EOF
 
       - name: Terraform fmt check
