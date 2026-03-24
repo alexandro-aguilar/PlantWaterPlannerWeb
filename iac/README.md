@@ -26,12 +26,12 @@ Required backend values per GitHub Environment:
 
 Required secret per GitHub Environment:
 
-- `AWS_ROLE_ARN`
+- `AWS_ROLE_TO_ASSUME`
 
 Recommended GitHub Environment setup:
 
-- `development`: add the variables above
-- `production`: add the same values and configure required reviewers so the manual workflow requires approval before deployment
+- `dev`: add the variables above
+- `prod`: add the same values and configure required reviewers so the manual workflow requires approval before deployment
 
 ## Local usage
 

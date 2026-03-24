@@ -57,8 +57,8 @@ jobs:
           TF_STATE_KEY: ${{ vars.TF_STATE_KEY }}
           TF_STATE_REGION: ${{ vars.TF_STATE_REGION || 'us-east-1' }}
         run: |
-          : "${TF_STATE_BUCKET:?Set the development TF_STATE_BUCKET GitHub Environment variable.}"
-          : "${TF_STATE_KEY:?Set the development TF_STATE_KEY GitHub Environment variable.}"
+          : "${TF_STATE_BUCKET:?Set the dev TF_STATE_BUCKET GitHub Environment variable.}"
+          : "${TF_STATE_KEY:?Set the dev TF_STATE_KEY GitHub Environment variable.}"
           cat <<EOF > backend.hcl
           bucket = "${TF_STATE_BUCKET}"
           key    = "${TF_STATE_KEY}"
@@ -115,7 +115,7 @@ jobs:
       - name: Publish deployment summary
         run: |
           {
-            echo "### Development deployment"
+            echo "### Dev deployment"
             echo ""
             echo "- Bucket: \`${{ steps.terraform_outputs.outputs.bucket_name }}\`"
             echo "- CloudFront distribution: \`${{ steps.terraform_outputs.outputs.distribution_id }}\`"
