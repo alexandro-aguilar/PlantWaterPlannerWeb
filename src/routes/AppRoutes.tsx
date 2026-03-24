@@ -19,5 +19,4 @@ const AppRoutes: FC = () => {
   return element
 }
 
-export { routesConfig }
 export default AppRoutes

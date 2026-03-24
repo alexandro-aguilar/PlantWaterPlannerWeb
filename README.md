@@ -7,10 +7,13 @@ React + TypeScript + Vite frontend for the Plant Water Planner application.
 Install dependencies and start the dev server:
 
 ```bash
+nvm use
 corepack enable
 yarn install
 yarn dev
 ```
+
+This project targets Node.js 24.
 
 The app currently uses:
 
