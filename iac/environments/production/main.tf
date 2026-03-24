@@ -20,8 +20,8 @@ data "aws_caller_identity" "current" {}
 locals {
   environment          = "production"
   bucket_env_suffix    = "prod"
-  sanitized_project    = regexreplace(lower(var.project_name), "[^a-z0-9-]", "-")
-  unique_suffix        = regexreplace(lower(coalesce(var.bucket_name_unique_suffix, data.aws_caller_identity.current.account_id)), "[^a-z0-9-]", "-")
+  sanitized_project    = replace(lower(var.project_name), "/[^a-z0-9-]/", "-")
+  unique_suffix        = replace(lower(coalesce(var.bucket_name_unique_suffix, data.aws_caller_identity.current.account_id)), "/[^a-z0-9-]/", "-")
   generated_bucket     = "${local.sanitized_project}-${local.bucket_env_suffix}-${local.unique_suffix}"
   resolved_bucket_name = coalesce(var.bucket_name, local.generated_bucket)
   common_tags = merge(
