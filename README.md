@@ -38,3 +38,5 @@ AWS static hosting is managed with Terraform and GitHub Actions.
 - Production deploys manually through GitHub Actions
 
 Before running the deployment workflows, update `.env.dev` and `.env.prod` with the correct API endpoint values and configure the required GitHub Environment variables and secrets described in `iac/README.md`.
+
+[![Deploy development](https://github.com/alexandro-aguilar/PlantWaterPlannerWeb/actions/workflows/deploy-development.yml/badge.svg)](https://github.com/alexandro-aguilar/PlantWaterPlannerWeb/actions/workflows/deploy-development.yml)
