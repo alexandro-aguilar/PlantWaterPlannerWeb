@@ -1,0 +1,123 @@
+name: Deploy development
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-development
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build development app
+        run: yarn build --mode dev
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Write backend config
+        working-directory: iac/environments/development
+        env:
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+          TF_STATE_KEY: ${{ vars.TF_STATE_KEY }}
+          TF_STATE_REGION: ${{ vars.TF_STATE_REGION || 'us-east-1' }}
+        run: |
+          : "${TF_STATE_BUCKET:?Set the development TF_STATE_BUCKET GitHub Environment variable.}"
+          : "${TF_STATE_KEY:?Set the development TF_STATE_KEY GitHub Environment variable.}"
+          cat <<EOF > backend.hcl
+          bucket = "${TF_STATE_BUCKET}"
+          key    = "${TF_STATE_KEY}"
+          region = "${TF_STATE_REGION}"
+          EOF
+
+      - name: Terraform fmt check
+        working-directory: iac
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        working-directory: iac/environments/development
+        run: terraform init -input=false -backend-config=backend.hcl
+
+      - name: Terraform validate
+        working-directory: iac/environments/development
+        run: terraform validate
+
+      - name: Terraform plan
+        working-directory: iac/environments/development
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Terraform apply
+        working-directory: iac/environments/development
+        run: terraform apply -input=false -auto-approve tfplan
+
+      - name: Capture Terraform outputs
+        id: terraform_outputs
+        working-directory: iac/environments/development
+        run: |
+          echo "bucket_name=$(terraform output -raw bucket_name)" >> "$GITHUB_OUTPUT"
+          echo "distribution_id=$(terraform output -raw distribution_id)" >> "$GITHUB_OUTPUT"
+          echo "distribution_domain_name=$(terraform output -raw distribution_domain_name)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload site assets to S3
+        run: |
+          aws s3 sync dist/ "s3://${{ steps.terraform_outputs.outputs.bucket_name }}" \
+            --delete \
+            --exclude "index.html" \
+            --cache-control "public,max-age=31536000,immutable"
+
+      - name: Upload HTML entrypoint
+        run: |
+          aws s3 cp dist/index.html "s3://${{ steps.terraform_outputs.outputs.bucket_name }}/index.html" \
+            --cache-control "no-cache,no-store,must-revalidate" \
+            --content-type "text/html"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ steps.terraform_outputs.outputs.distribution_id }}" \
+            --paths "/*"
+
+      - name: Publish deployment summary
+        run: |
+          {
+            echo "### Development deployment"
+            echo ""
+            echo "- Bucket: \`${{ steps.terraform_outputs.outputs.bucket_name }}\`"
+            echo "- CloudFront distribution: \`${{ steps.terraform_outputs.outputs.distribution_id }}\`"
+            echo "- URL: https://${{ steps.terraform_outputs.outputs.distribution_domain_name }}"
+          } >> "$GITHUB_STEP_SUMMARY"
